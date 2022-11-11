@@ -16,12 +16,11 @@ BLACK = 0x000000
 WHITE = 0xFFFFFF
 GREY = 0x7D7D7D
 GAME_COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
-
 WIDTH = 800
 HEIGHT = 600
 
-
 class Ball:
+
     def __init__(self, screen: pygame.Surface, x=40, y=450):
         """ Конструктор класса ball
 
@@ -195,8 +194,10 @@ balls = []
 clock = pygame.time.Clock()
 gun = Gun(screen)
 target = Target(screen)
+target2 = Target(screen)
 finished = False
 target.new_target()
+target2.new_target()
 
 f1 = pygame.font.Font(None, 35)
 counter = 0
@@ -206,6 +207,7 @@ while not finished:
     screen.fill(WHITE)
     gun.draw()
     target.draw()
+    target2.draw()
     for b in balls:
         b.draw()
     pygame.display.update()
@@ -230,7 +232,6 @@ while not finished:
             target.live = 0
             b.live = 0
             points += 1
-            target.hit()
             pygame.draw.rect(screen, WHITE, (0, 0, 800, 600))
             image = pygame.image.load("BSOD_Windows_8.svg")
             screen.blit(image, image.get_rect())
@@ -240,8 +241,24 @@ while not finished:
             screen.blit(text2, (420, 245))
             pygame.display.update()
             counter = 0
-            clock.tick(0.4)
+            clock.tick(1/2)
             target.new_target()
+        if b.hittest(target2) and target2.live:
+            target2.live = 0
+            b.live = 0
+            points += 1
+            # target.hit()
+            pygame.draw.rect(screen, WHITE, (0, 0, 800, 600))
+            image = pygame.image.load("BSOD_Windows_8.svg")
+            screen.blit(image, image.get_rect())
+            text1 = f1.render(f'Вы попали в мишень за {counter} выстрел(-а/-ов)', True, (255, 255, 255))
+            screen.blit(text1, (230, 200))
+            text2 = f1.render(f'Счёт: {points}', True, (255, 255, 255))
+            screen.blit(text2, (420, 245))
+            pygame.display.update()
+            counter = 0
+            clock.tick(1/2)
+            target2.new_target()
         if b.live <= 0:
             balls.pop(balls.index(b))
     gun.power_up()

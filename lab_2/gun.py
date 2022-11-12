@@ -50,13 +50,13 @@ class Ball:
         и стен по краям окна (размер окна 800х600).
         """
         if (self.x + self.r >= WIDTH) or (self.x - self.r <= 0):
-            self.vx *= -0.85
+            self.vx *= -0.8
             if self.x + self.r >= WIDTH:
                 self.x = WIDTH - self.r - 1
             else:
                 self.x = 1 + self.r
         if (self.y + self.r >= HEIGHT):
-            self.vy *= -0.85
+            self.vy *= -0.8
             self.vy += 1
             self.y = HEIGHT - self.r - 1
 
@@ -106,16 +106,30 @@ class Gun:
         Происходит при отпускании кнопки мыши.
         Начальные значения компонент скорости мяча vx и vy зависят от положения мыши.
         """
-        global balls, bullet
-        bullet += 1
-        new_ball = Ball(self.screen)
-        new_ball.r += 5
-        self.an = math.atan2((event.pos[1]-new_ball.y), (event.pos[0]-new_ball.x))
-        new_ball.vx = self.f2_power * math.cos(self.an)
-        new_ball.vy = self.f2_power * math.sin(self.an)
-        balls.append(new_ball)
-        self.f2_on = 0
-        self.f2_power = 10
+        global balls, bullet, t_type
+        if t_type == 1:
+            bullet += 1
+            new_ball = Ball(self.screen)
+            new_ball.r += 5
+            self.an = math.atan2((event.pos[1]-new_ball.y), (event.pos[0]-new_ball.x))
+            new_ball.vx = self.f2_power * math.cos(self.an)
+            new_ball.vy = self.f2_power * math.sin(self.an)
+            balls.append(new_ball)
+            self.f2_on = 0
+            self.f2_power = 10
+        else:
+            bullet += 5
+            p = self.f2_power
+            for i in range(5):
+                new_ball = Ball(self.screen)
+                new_ball.r -= 3
+                new_ball.live -= 70
+                self.an = math.atan2((event.pos[1] - new_ball.y), (event.pos[0] - new_ball.x)) + (i - 2) / 35
+                new_ball.vx = p * math.cos(self.an)
+                new_ball.vy = p * math.sin(self.an)
+                balls.append(new_ball)
+                self.f2_on = 0
+            self.f2_power = 10
 
     def targetting(self, event):
         """
@@ -153,14 +167,18 @@ class Gun:
 
 
 class Target:
+    global t_type
     def __init__(self, screen):
         self.screen = screen
         self.points = 0
         self.live = 1
         self.color = RED
-        self.vx = choice([1, 2, 3, 4, 5, 6, 7, 8, 9]) * choice([-1, 1])
-        self.vy = (100 - self.vx**2)**0.5 * choice([-1, 1])
-    # self.new_target()
+        if t_type == 1:
+            self.vx = choice([1, 2, 3, 4, 5, 6, 7, 8, 9]) * choice([-1, 1])
+            self.vy = (100 - self.vx ** 2) ** 0.5 * choice([-1, 1])
+        else:
+            self.vx = choice([1, 2, 3, 4, 5, 6, 7, 8, 9]) * choice([-1, 1]) * 2
+            self.vy = (400 - self.vx**2)**0.5 * choice([-1, 1])
 
     def new_target(self):
         """
@@ -171,7 +189,10 @@ class Target:
         """
         self.x = randint(500, 780)
         self.y = randint(100, 550)
-        self.r = randint(10, 40)
+        if t_type == 1:
+            self.r = randint(10, 40)
+        else:
+            self.r = randint(10, 20)
         self.live = 1
         self.color = RED
 
@@ -206,6 +227,15 @@ class Target:
         self.y += self.vy
 
 
+print("Выберите тип снаряда \n "
+      "1. Обычный скучный шарик (ооочень большие мишени, которые к тому же медленные как черепахи) "
+      "\n 2. Мать её картечь (малюсенькие мишени, которые носятся по экрану, режим для настоящих мужиков)")
+t_type = input()
+
+while t_type not in ['1', '2']:
+    print("Русским языком сказано: 1 или 2. Может, получится сейчас?")
+    t_type = input()
+t_type = int(t_type)
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -223,6 +253,7 @@ target2.new_target()
 f1 = pygame.font.Font(None, 35)
 counter = 0
 points = 0
+
 
 while not finished:
     screen.fill(WHITE)

@@ -158,6 +158,8 @@ class Target:
         self.points = 0
         self.live = 1
         self.color = RED
+        self.vx = choice([1, 2, 3, 4, 5, 6, 7, 8, 9]) * choice([-1, 1])
+        self.vy = (100 - self.vx**2)**0.5 * choice([-1, 1])
     # self.new_target()
 
     def new_target(self):
@@ -185,6 +187,25 @@ class Target:
         """
         pygame.draw.circle(self.screen, self.color, (self.x, self.y), self.r)
 
+    def move(self):
+        if (self.x + self.r >= WIDTH) or (self.x - self.r <= 0):
+            self.vx *= -1
+            if self.x + self.r >= WIDTH:
+                self.x = WIDTH - self.r - 1
+            else:
+                self.x = 1 + self.r
+        if (self.y + self.r >= HEIGHT) or (self.y - self.r <= 0):
+            self.vy *= -1
+            if self.y + self.r >= HEIGHT:
+                self.y = HEIGHT - self.r - 1
+            else:
+                self.y = 1 + self.r
+
+
+        self.x += self.vx
+        self.y += self.vy
+
+
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -208,6 +229,8 @@ while not finished:
     gun.draw()
     target.draw()
     target2.draw()
+    target.move()
+    target2.move()
     for b in balls:
         b.draw()
     pygame.display.update()
@@ -241,7 +264,7 @@ while not finished:
             screen.blit(text2, (420, 245))
             pygame.display.update()
             counter = 0
-            clock.tick(1/2)
+            clock.tick(1)
             target.new_target()
         if b.hittest(target2) and target2.live:
             target2.live = 0
@@ -257,7 +280,7 @@ while not finished:
             screen.blit(text2, (420, 245))
             pygame.display.update()
             counter = 0
-            clock.tick(1/2)
+            clock.tick(1)
             target2.new_target()
         if b.live <= 0:
             balls.pop(balls.index(b))
